@@ -22,11 +22,11 @@ export interface DocumentChunk {
 async function generateEmbedding(text: string): Promise<number[]> {
   console.log("[v0] Generating embedding for text:", text.substring(0, 50) + "...")
 
-  const response = await fetch("https://api.thesys.ai/embed", {
+  const response = await fetch("https://api.openai.com/v1/embeddings", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.THESYS_API_KEY}`,
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY || process.env.THESYS_API_KEY}`,
     },
     body: JSON.stringify({
       input: text,
@@ -40,15 +40,7 @@ async function generateEmbedding(text: string): Promise<number[]> {
     throw new Error(`Embedding generation failed: ${response.status} - ${errorText}`)
   }
 
-  let data
-  try {
-    const responseText = await response.text()
-    console.log("[v0] Embedding API response:", responseText.substring(0, 200))
-    data = JSON.parse(responseText)
-  } catch (error) {
-    console.error("[v0] Failed to parse embedding response as JSON:", error)
-    throw new Error(`Invalid JSON response from embedding API: ${error}`)
-  }
+  const data = await response.json()
 
   if (!data.data || !data.data[0] || !data.data[0].embedding) {
     console.error("[v0] Unexpected embedding response structure:", data)

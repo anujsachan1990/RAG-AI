@@ -1,24 +1,32 @@
 // Upstash Vector Store for RAG implementation
 // Uses Upstash's built-in embedding generation (no OpenAI key needed)
-import { Index } from "@upstash/vector"
+import { Index } from "@upstash/vector";
 
 // Initialize Upstash Vector client
 export function getVectorStore() {
   return new Index({
-    url: process.env.UPSTASH_VECTOR_REST_URL!,
-    token: process.env.UPSTASH_VECTOR_REST_TOKEN!,
-  })
+    url: "https://frank-elk-90782-us1-vector.upstash.io",
+    token:
+      "ABMFMGZyYW5rLWVsay05MDc4Mi11czFhZG1pblpEZzVZelEyTlRJdE5UVmtOUzAwT0RVMUxUZ3lNemN0TlRrellqWXhNRGcwWmpObQ==",
+  });
+}
+
+export interface ImageData {
+  src: string;
+  alt?: string;
+  title?: string;
+  caption?: string;
 }
 
 export interface DocumentChunk {
-  id: string
-  text: string
+  id: string;
+  text: string;
   metadata: {
-    url: string
-    title: string
-    timestamp: number
-    images?: Array<{ src: string; alt?: string }>
-  }
+    url: string;
+    title: string;
+    timestamp: number;
+    images?: ImageData[];
+  };
 }
 
 /**
@@ -26,20 +34,20 @@ export interface DocumentChunk {
  * Upstash will automatically generate embeddings from the text
  */
 export async function upsertDocuments(chunks: DocumentChunk[]) {
-  const index = getVectorStore()
+  const index = getVectorStore();
 
   const vectors = chunks.map((chunk) => ({
     id: chunk.id,
     data: chunk.text, // Raw text, not embeddings
     metadata: chunk.metadata,
-  }))
+  }));
 
   try {
-    await index.upsert(vectors)
-    console.log(`[v0] Upserted ${vectors.length} documents to vector store`)
+    await index.upsert(vectors);
+    console.log(`[v0] Upserted ${vectors.length} documents to vector store`);
   } catch (error) {
-    console.error("[v0] Error upserting documents:", error)
-    throw error
+    console.error("[v0] Error upserting documents:", error);
+    throw error;
   }
 }
 
@@ -48,10 +56,11 @@ export async function upsertDocuments(chunks: DocumentChunk[]) {
  * Upstash will automatically embed the query text
  */
 export async function queryVectorStore(query: string, topK = 3) {
-  console.log(`[v0] Querying vector store with: "${query}"`)
+  console.log(`[v0] Querying vector store with: "${query}"`);
 
-  const url = process.env.UPSTASH_VECTOR_REST_URL!
-  const token = process.env.UPSTASH_VECTOR_REST_TOKEN!
+  const url = "https://frank-elk-90782-us1-vector.upstash.io";
+  const token =
+    "ABMFMGZyYW5rLWVsay05MDc4Mi11czFhZG1pblpEZzVZelEyTlRJdE5UVmtOUzAwT0RVMUxUZ3lNemN0TlRrellqWXhNRGcwWmpObQ==";
 
   try {
     const response = await fetch(`${url}/query-data`, {
@@ -66,34 +75,37 @@ export async function queryVectorStore(query: string, topK = 3) {
         includeMetadata: true,
         includeData: true,
       }),
-    })
+    });
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`[v0] Query failed with status ${response.status}:`, errorText)
+      const errorText = await response.text();
+      console.error(
+        `[v0] Query failed with status ${response.status}:`,
+        errorText
+      );
 
       // If query-data doesn't work, the index might not have an embedding model
       // Return empty results instead of crashing
       console.error(
-        "[v0] The index may not be configured with an embedding model. Please recreate your Upstash index with an embedding model.",
-      )
-      return []
+        "[v0] The index may not be configured with an embedding model. Please recreate your Upstash index with an embedding model."
+      );
+      return [];
     }
 
-    const data = await response.json()
-    const results = data.result || []
+    const data = await response.json();
+    const results = data.result || [];
 
-    console.log(`[v0] Query successful, found ${results.length} relevant documents`)
+    console.log(
+      `[v0] Query successful, found ${results.length} relevant documents`
+    );
 
     return results.map((result: any) => ({
       text: result.data || "",
       score: result.score,
-      metadata: {
-        ...(result.metadata as DocumentChunk["metadata"]),
-      },
-    }))
+      metadata: result.metadata as DocumentChunk["metadata"],
+    }));
   } catch (error) {
-    console.error("[v0] Error querying vector store:", error)
-    return []
+    console.error("[v0] Error querying vector store:", error);
+    return [];
   }
 }

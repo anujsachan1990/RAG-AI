@@ -82,5 +82,5 @@ background: '#7c3aed', // Primary color
 3. Click "Remove"
 \`\`\`
 
-```json file="chrome-extension-manifest.json" isDeleted="true"
+\`\`\`json file="chrome-extension-manifest.json" isDeleted="true"
 ...deleted...

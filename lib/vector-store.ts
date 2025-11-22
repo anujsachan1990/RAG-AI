@@ -53,7 +53,7 @@ export async function queryVectorStore(query: string, topK = 3) {
   const token = process.env.UPSTASH_VECTOR_REST_TOKEN!
 
   try {
-    const response = await fetch(`${url}/query-data`, {
+    const response = await fetch(`${url}/query`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -71,11 +71,11 @@ export async function queryVectorStore(query: string, topK = 3) {
       const errorText = await response.text()
       console.error(`[v0] Query failed with status ${response.status}:`, errorText)
 
-      // If query-data doesn't work, the index might not have an embedding model
-      // Return empty results instead of crashing
-      console.error(
-        "[v0] The index may not be configured with an embedding model. Please recreate your Upstash index with an embedding model.",
-      )
+      if (response.status === 404) {
+        console.error(
+          "[v0] 404 Error: The Upstash Vector index may not be configured properly. Check that your UPSTASH_VECTOR_REST_URL is correct.",
+        )
+      }
       return []
     }
 

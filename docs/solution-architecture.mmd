@@ -1,0 +1,161 @@
+graph TB
+    subgraph "Client Layer"
+        A[Web Browser]
+        A1[Mobile Safari/Chrome]
+        A2[Desktop Browser]
+    end
+
+    subgraph "Presentation Layer - Next.js 16"
+        B[Landing Screen Component]
+        C[Chat Interface Component]
+        D[Message Bubble Component]
+        E[C1 Renderer Component]
+        F[Header Component]
+        G[Sparkle Effect Component]
+        H[Logo Component]
+        I[HESTA AI Icon]
+    end
+
+    subgraph "State Management"
+        J[React State]
+        J1[Messages State]
+        J2[Input State]
+        J3[Loading State]
+        J4[Show Chat State]
+    end
+
+    subgraph "API Layer - Next.js API Routes"
+        K[/api/chat Route Handler]
+        K1[Request Validation]
+        K2[Message Processing]
+        K3[Stream Handler]
+    end
+
+    subgraph "External Services"
+        L[Thesys API]
+        L1[Claude Sonnet 4 Model]
+        L2[c1/anthropic/claude-sonnet-4/v-20250915]
+    end
+
+    subgraph "Security Layer"
+        M[Environment Variables]
+        M1[THESYS_API_KEY]
+        M2[Server-Side Proxy]
+    end
+
+    subgraph "UI Component Library"
+        N[shadcn/ui Components]
+        N1[Button]
+        N2[Input]
+        N3[Card]
+        N4[Accordion]
+        N5[Badge]
+        N6[Label]
+        N7[RadioGroup]
+    end
+
+    subgraph "Styling System"
+        O[Tailwind CSS 4]
+        O1[Design Tokens]
+        O2[Responsive Utilities]
+        O3[Theme System]
+    end
+
+    subgraph "Data Flow"
+        P[User Input]
+        Q[Conversation History]
+        R[System Prompt]
+        S[AI Response Stream]
+        T[Parsed JSON Components]
+        U[Rendered UI]
+    end
+
+    %% User Interaction Flow
+    A --> B
+    A1 --> B
+    A2 --> B
+    B --> P
+    P --> J4
+    J4 --> C
+    
+    %% Chat Flow
+    C --> D
+    C --> G
+    C --> I
+    C --> J
+    J --> J1
+    J --> J2
+    J --> J3
+    
+    %% API Request Flow
+    C --> P
+    P --> Q
+    Q --> R
+    R --> K
+    K --> K1
+    K1 --> K2
+    K2 --> M2
+    M2 --> M
+    M --> M1
+    M1 --> L
+    
+    %% AI Processing Flow
+    L --> L1
+    L1 --> L2
+    L2 --> S
+    S --> K3
+    K3 --> C
+    
+    %% Response Rendering Flow
+    S --> T
+    T --> E
+    E --> N
+    E --> O
+    N --> U
+    O --> U
+    U --> D
+    
+    %% Component Dependencies
+    B --> H
+    B --> N1
+    B --> N2
+    C --> N1
+    C --> N2
+    D --> E
+    E --> N3
+    E --> N4
+    E --> N5
+    E --> N6
+    E --> N7
+    F --> H
+    
+    %% Styling Dependencies
+    B --> O
+    C --> O
+    D --> O
+    E --> O
+    O --> O1
+    O --> O2
+    O --> O3
+
+    %% Security Flow
+    K --> M2
+    M2 --> M1
+
+    style A fill:#e1f5ff
+    style A1 fill:#e1f5ff
+    style A2 fill:#e1f5ff
+    style B fill:#b8e6ff
+    style C fill:#b8e6ff
+    style D fill:#b8e6ff
+    style E fill:#b8e6ff
+    style F fill:#b8e6ff
+    style K fill:#ffe6b8
+    style L fill:#ffb8b8
+    style L1 fill:#ffb8b8
+    style L2 fill:#ffb8b8
+    style M fill:#b8ffb8
+    style M1 fill:#b8ffb8
+    style M2 fill:#b8ffb8
+    style N fill:#e6b8ff
+    style O fill:#ffe6e6

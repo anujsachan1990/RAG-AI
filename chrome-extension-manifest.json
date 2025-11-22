@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Hesta AI Assistant",
+  "version": "1.0.0",
+  "description": "AI-powered chat assistant with RAG capabilities",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["https://hesta.com.au/*", "https://*.hesta.com.au/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://hesta.com.au/*", "https://*.hesta.com.au/*"],
+      "js": ["content-script.js"],
+      "css": ["sidebar.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icon-16.jpg",
+      "32": "icon-32.jpg",
+      "48": "icon-48.jpg",
+      "128": "icon-128.jpg"
+    },
+    "default_title": "Toggle Hesta AI Assistant"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["sidebar.html", "*.js", "*.css", "*.svg", "*.png"],
+      "matches": ["https://hesta.com.au/*", "https://*.hesta.com.au/*"]
+    }
+  ],
+  "icons": {
+    "16": "icon-16.jpg",
+    "32": "icon-32.jpg",
+    "48": "icon-48.jpg",
+    "128": "icon-128.jpg"
+  }
+}

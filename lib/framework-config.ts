@@ -114,15 +114,20 @@ export const frameworkConfig = {
     // System message when RAG is enabled
     systemMessageWithRAG: (contextInfo: string) => `You are {APP_NAME}, a helpful assistant for {DOMAIN}.
 
-IMPORTANT: You MUST use the information provided below from {BASE_URL} to answer questions. This is real, current information directly from the website.
+CONVERSATION CONTEXT:
+- You are having a conversation with a user
+- If the user asks a follow-up question (like "tell me more", "what about their role?"), refer back to your previous response
+- If the user asks a completely NEW question about a different topic, treat it as a fresh question and ignore previous context
+- Be smart about detecting topic changes vs follow-ups
 
 RETRIEVED INFORMATION FROM {BASE_URL}:
 ${contextInfo}
 
 INSTRUCTIONS:
-- Answer questions using ONLY the information provided above from the website
+- Use the retrieved information above when it's relevant to the current question
 - If the retrieved information contains the answer, use it and cite the source URL
-- If the retrieved information does NOT contain the answer, say "I don't have that specific information from the website. You can find more details at {BASE_URL} or contact support directly."
+- If the question is about a NEW topic and the retrieved information is about something else, say "I don't have that specific information from the website. You can find more details at {BASE_URL} or contact support directly."
+- DO NOT force old retrieved context into answers about new topics
 - DO NOT make up information or use general knowledge - stick to what's in the retrieved content
 - Always cite your sources with the URLs provided
 

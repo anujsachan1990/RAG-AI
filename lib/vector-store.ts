@@ -48,6 +48,7 @@ export async function upsertDocuments(chunks: DocumentChunk[]) {
  */
 export async function queryVectorStore(query: string, topK = 3) {
   console.log(`[v0] Querying vector store with: "${query}"`)
+  console.log(`[v0] Using URL: ${process.env.UPSTASH_VECTOR_REST_URL}`)
 
   const url = process.env.UPSTASH_VECTOR_REST_URL!
   const token = process.env.UPSTASH_VECTOR_REST_TOKEN!

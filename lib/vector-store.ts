@@ -20,6 +20,8 @@ export interface DocumentChunk {
 }
 
 async function generateEmbedding(text: string): Promise<number[]> {
+  console.log("[v0] Generating embedding for text:", text.substring(0, 50) + "...")
+
   const response = await fetch("https://api.thesys.ai/embed", {
     method: "POST",
     headers: {
@@ -33,10 +35,27 @@ async function generateEmbedding(text: string): Promise<number[]> {
   })
 
   if (!response.ok) {
-    throw new Error(`Embedding generation failed: ${response.statusText}`)
+    const errorText = await response.text()
+    console.error(`[v0] Embedding API failed with status ${response.status}:`, errorText)
+    throw new Error(`Embedding generation failed: ${response.status} - ${errorText}`)
   }
 
-  const data = await response.json()
+  let data
+  try {
+    const responseText = await response.text()
+    console.log("[v0] Embedding API response:", responseText.substring(0, 200))
+    data = JSON.parse(responseText)
+  } catch (error) {
+    console.error("[v0] Failed to parse embedding response as JSON:", error)
+    throw new Error(`Invalid JSON response from embedding API: ${error}`)
+  }
+
+  if (!data.data || !data.data[0] || !data.data[0].embedding) {
+    console.error("[v0] Unexpected embedding response structure:", data)
+    throw new Error("Invalid embedding response structure")
+  }
+
+  console.log(`[v0] Successfully generated embedding with ${data.data[0].embedding.length} dimensions`)
   return data.data[0].embedding
 }
 

@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { LogoSparkles } from "./logo-sparkles"
-import { frameworkConfig } from "@/lib/framework-config"
 
 interface LandingScreenProps {
   onStartChat: (initialMessage: string) => void
@@ -16,7 +15,7 @@ interface LandingScreenProps {
 export function LandingScreen({ onStartChat }: LandingScreenProps) {
   const [input, setInput] = useState("")
   const [placeholder, setPlaceholder] = useState("")
-  const fullText = frameworkConfig.landingPage.placeholderText
+  const fullText = "Ask anything about super..."
 
   useEffect(() => {
     let currentIndex = 0
@@ -30,7 +29,7 @@ export function LandingScreen({ onStartChat }: LandingScreenProps) {
     }, 50) // Fast typing speed (50ms per character)
 
     return () => clearInterval(typingInterval)
-  }, [fullText])
+  }, [])
 
   const handleSubmit = () => {
     if (input.trim()) {
@@ -45,7 +44,14 @@ export function LandingScreen({ onStartChat }: LandingScreenProps) {
     }
   }
 
-  const suggestions = frameworkConfig.landingPage.suggestions
+  const suggestions = [
+    "What are HESTA's fees and costs?",
+    "How can I combine my super accounts?",
+    "What are the latest investment updates?",
+    "How do I access advice from a HESTA adviser?",
+    "Last 10 financial years annual returns",
+    "How can I contribute to my super?",
+  ]
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background to-muted/20 px-4 py-8 md:px-6">
@@ -56,17 +62,14 @@ export function LandingScreen({ onStartChat }: LandingScreenProps) {
             <div className="relative">
               <LogoSparkles />
 
+              {/* Logo */}
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg md:h-32 md:w-32">
-                <img
-                  src={frameworkConfig.branding.logoUrl || "/placeholder.svg"}
-                  alt={`${frameworkConfig.branding.name} Logo`}
-                  className="h-full w-full object-cover"
-                />
+                <img src="/images/design-mode/1200x600wa.png" alt="HESTA Logo" className="h-full w-full object-cover" />
               </div>
             </div>
           </div>
           <p className="mt-3 text-pretty px-4 text-sm text-muted-foreground md:mt-4 md:text-lg">
-            {frameworkConfig.branding.description}
+            Your intelligent assistant for superannuation and retirement planning
           </p>
         </div>
 
@@ -93,24 +96,13 @@ export function LandingScreen({ onStartChat }: LandingScreenProps) {
 
         {/* Suggestions */}
         <div className="space-y-2.5 md:space-y-3">
-          <p className="text-center text-xs text-muted-foreground md:text-sm">
-            {frameworkConfig.landingPage.suggestionsLabel}
-          </p>
+          <p className="text-center text-xs text-muted-foreground md:text-sm">Try asking:</p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
                 onClick={() => setInput(suggestion)}
                 className="cursor-pointer border border-transparent bg-[#7226e0] px-3 py-3 text-center text-xs text-white transition-all hover:bg-[#292460] hover:text-white md:py-2.5"
-                style={{
-                  backgroundColor: frameworkConfig.theme.colors.primary,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = frameworkConfig.theme.colors.accent
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = frameworkConfig.theme.colors.primary
-                }}
               >
                 {suggestion}
               </button>
@@ -118,8 +110,9 @@ export function LandingScreen({ onStartChat }: LandingScreenProps) {
           </div>
         </div>
 
+        {/* Footer note */}
         <p className="mt-8 px-4 text-center text-xs text-muted-foreground md:mt-12">
-          {frameworkConfig.branding.disclaimerText}
+          HESTA AI can make mistakes. Check important info with official HESTA resources.
         </p>
       </div>
     </div>

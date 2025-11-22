@@ -182,7 +182,7 @@ export function ChatInterface({ initialMessage }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="container mx-auto flex h-[calc(100vh-4rem)] max-w-4xl flex-col px-3 md:px-4 overflow-x-hidden py-4 md:py-6">
+    <div className="container mx-auto flex h-[calc(100vh-4rem)] max-w-4xl flex-col px-3 md:px-4 overflow-x-hidden">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 md:py-6">
         <div className="space-y-4 md:space-y-6">

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HESTA AI Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <svg class="logo" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1 class="title">HESTA AI</h1>
+      </div>
+      <button id="settingsBtn" class="settings-btn" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6m8.66-13l-3 5.196M6.34 15.804l-3 5.196m13.66-18.392l-3 5.196M6.34 8.196l-3-5.196"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Settings Panel -->
+    <div id="settingsPanel" class="settings-panel hidden">
+      <label class="setting-item">
+        <span>API Endpoint:</span>
+        <input type="text" id="apiEndpoint" placeholder="http://localhost:3000" />
+      </label>
+      <label class="setting-item">
+        <input type="checkbox" id="enableRag" checked />
+        <span>Enable RAG (Vector Search)</span>
+      </label>
+      <button id="saveSettings" class="save-btn">Save Settings</button>
+    </div>
+
+    <!-- Chat Messages -->
+    <div id="chatMessages" class="chat-messages">
+      <div class="welcome-message">
+        <p class="welcome-text">👋 Hi! I'm HESTA AI, your superannuation assistant.</p>
+        <p class="welcome-subtext">Ask me anything about HESTA super, retirement planning, or investments.</p>
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator hidden">
+      <div class="loading-spinner"></div>
+      <span>Thinking...</span>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <textarea 
+        id="messageInput" 
+        placeholder="Ask anything about super..." 
+        rows="1"
+      ></textarea>
+      <button id="sendBtn" class="send-btn" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

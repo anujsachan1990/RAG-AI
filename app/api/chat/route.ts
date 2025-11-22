@@ -1,5 +1,4 @@
-import { retrieveContent, formatContextForLLM } from "@/lib/rag-retriever"
-import { frameworkConfig, replacePlaceholders } from "@/lib/framework-config"
+import { retrieveHestaContent, formatContextForLLM } from "@/lib/rag-retriever"
 
 export async function POST(request: Request) {
   try {
@@ -10,16 +9,13 @@ export async function POST(request: Request) {
 
     console.log("[v0] User query:", userQuery)
 
-    // Check if RAG is enabled (env var takes precedence over config)
-    const ragEnabled =
-      process.env.ENABLE_RAG === "false" ? false : process.env.ENABLE_RAG === "true" || frameworkConfig.rag.enabled
-
+    const ragEnabled = process.env.ENABLE_RAG === "true"
     console.log("[v0] RAG enabled:", ragEnabled)
 
-    let systemMessage = ""
+    let systemMessage = "You are Hesta AI, a helpful assistant for Hesta superannuation fund."
 
     if (ragEnabled) {
-      const relevantContent = await retrieveContent(userQuery, frameworkConfig.rag.maxResults)
+      const relevantContent = await retrieveHestaContent(userQuery, 5)
       const contextInfo = formatContextForLLM(relevantContent)
 
       console.log("[v0] Retrieved context from vector store, results:", relevantContent.length)
@@ -27,10 +23,26 @@ export async function POST(request: Request) {
       console.log("[v0] Full formatted context being sent to LLM:")
       console.log(contextInfo)
 
-      systemMessage = replacePlaceholders(frameworkConfig.ai.systemMessageWithRAG(contextInfo))
+      systemMessage = `You are Hesta AI, a helpful assistant for Hesta superannuation fund. 
+
+IMPORTANT: You MUST use the information provided below from hesta.com.au to answer questions. This is real, current information directly from Hesta's website.
+
+RETRIEVED INFORMATION FROM HESTA.COM.AU:
+${contextInfo}
+
+INSTRUCTIONS:
+- Answer questions using ONLY the information provided above from Hesta's website
+- If the retrieved information contains the answer, use it and cite the source URL
+- If the retrieved information does NOT contain the answer, say "I don't have that specific information from Hesta's website. You can find more details at https://www.hesta.com.au or contact Hesta directly."
+- DO NOT make up information or use general knowledge about superannuation - stick to what's in the retrieved content
+- Always cite your sources with the URLs provided
+
+Be helpful, accurate, and transparent about what information you have access to.`
     } else {
       console.log("[v0] RAG is disabled - using pure LLM responses without retrieved context")
-      systemMessage = replacePlaceholders(frameworkConfig.ai.systemMessageWithoutRAG)
+      systemMessage = `You are Hesta AI, a helpful assistant for Hesta superannuation fund. 
+
+Note: You are currently operating WITHOUT access to Hesta's website content. Please provide general assistance and direct users to https://www.hesta.com.au for specific, current information.`
     }
 
     const enhancedMessages = [
@@ -41,19 +53,14 @@ export async function POST(request: Request) {
       ...messages,
     ]
 
-    const apiKey = process.env[frameworkConfig.api.apiKeyEnvVar]
-    if (!apiKey) {
-      throw new Error(`Missing API key: ${frameworkConfig.api.apiKeyEnvVar}`)
-    }
-
-    const response = await fetch(frameworkConfig.api.endpoint, {
+    const response = await fetch("https://api.thesys.dev/v1/embed/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${process.env.THESYS_API_KEY}`,
       },
       body: JSON.stringify({
-        model: process.env.AI_MODEL || frameworkConfig.api.defaultModel,
+        model: "c1/anthropic/claude-sonnet-4/v-20250915",
         messages: enhancedMessages,
         stream: true,
       }),
@@ -61,23 +68,9 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error("[v0] API error:", response.status, errorText)
-
-      let errorMessage = `API error: ${response.status}`
-      try {
-        const errorJson = JSON.parse(errorText)
-        if (errorJson.error?.type === "ERR_BILLING_THRESHOLD_EXCEEDED") {
-          errorMessage =
-            "AI service billing limit exceeded. Please update your API key or switch to an alternative provider. See README for instructions."
-        } else if (errorJson.error?.message) {
-          errorMessage = errorJson.error.message
-        }
-      } catch {
-        // Keep default error message if parsing fails
-      }
-
-      return new Response(JSON.stringify({ error: errorMessage }), {
-        status: response.status,
+      console.error("[v0] Thesys API error:", response.status, errorText)
+      return new Response(JSON.stringify({ error: `API error: ${response.status}` }), {
+        status: 500,
         headers: { "Content-Type": "application/json" },
       })
     }

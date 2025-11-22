@@ -242,13 +242,6 @@ api: {
 
 ## Troubleshooting
 
-### "Billing threshold exceeded" Error
-
-If you see an error about billing limits, your API key has reached its usage threshold. See [API_PROVIDERS.md](./API_PROVIDERS.md) for detailed instructions on:
-- Updating your API key
-- Switching to alternative AI providers (OpenAI, Anthropic, OpenRouter)
-- Configuring different models and endpoints
-
 ### RAG Not Returning Accurate Information
 
 If the RAG system is retrieving documents but providing generic answers:

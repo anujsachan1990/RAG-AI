@@ -1,0 +1,5 @@
+/* Additional styles for the sidebar injection */
+body.hesta-ai-sidebar-open {
+  margin-right: 500px !important;
+  transition: margin-right 0.3s ease-in-out !important;
+}

@@ -62,22 +62,8 @@ export async function POST(request: Request) {
     if (!response.ok) {
       const errorText = await response.text()
       console.error("[v0] API error:", response.status, errorText)
-
-      let errorMessage = `API error: ${response.status}`
-      try {
-        const errorJson = JSON.parse(errorText)
-        if (errorJson.error?.type === "ERR_BILLING_THRESHOLD_EXCEEDED") {
-          errorMessage =
-            "AI service billing limit exceeded. Please update your API key or switch to an alternative provider. See README for instructions."
-        } else if (errorJson.error?.message) {
-          errorMessage = errorJson.error.message
-        }
-      } catch {
-        // Keep default error message if parsing fails
-      }
-
-      return new Response(JSON.stringify({ error: errorMessage }), {
-        status: response.status,
+      return new Response(JSON.stringify({ error: `API error: ${response.status}` }), {
+        status: 500,
         headers: { "Content-Type": "application/json" },
       })
     }

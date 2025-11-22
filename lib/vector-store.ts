@@ -1,5 +1,4 @@
 // Upstash Vector Store for RAG implementation
-// Uses Upstash's built-in embedding generation (no OpenAI key needed)
 import { Index } from "@upstash/vector"
 
 // Initialize Upstash Vector client
@@ -20,22 +19,50 @@ export interface DocumentChunk {
   }
 }
 
+async function generateEmbedding(text: string): Promise<number[]> {
+  const response = await fetch("https://api.thesys.ai/embed", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.THESYS_API_KEY}`,
+    },
+    body: JSON.stringify({
+      input: text,
+      model: "text-embedding-3-small",
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Embedding generation failed: ${response.statusText}`)
+  }
+
+  const data = await response.json()
+  return data.data[0].embedding
+}
+
 /**
- * Upsert documents into the vector store
- * Upstash will automatically generate embeddings from the text
+ * Upsert documents into the vector store with embeddings
  */
 export async function upsertDocuments(chunks: DocumentChunk[]) {
   const index = getVectorStore()
 
-  const vectors = chunks.map((chunk) => ({
-    id: chunk.id,
-    data: chunk.text, // Raw text, not embeddings
-    metadata: chunk.metadata,
-  }))
+  const vectorsWithEmbeddings = await Promise.all(
+    chunks.map(async (chunk) => {
+      const embedding = await generateEmbedding(chunk.text)
+      return {
+        id: chunk.id,
+        vector: embedding, // Dense vector embeddings
+        metadata: {
+          ...chunk.metadata,
+          text: chunk.text, // Store text in metadata
+        },
+      }
+    }),
+  )
 
   try {
-    await index.upsert(vectors)
-    console.log(`[v0] Upserted ${vectors.length} documents to vector store`)
+    await index.upsert(vectorsWithEmbeddings)
+    console.log(`[v0] Upserted ${vectorsWithEmbeddings.length} documents to vector store`)
   } catch (error) {
     console.error("[v0] Error upserting documents:", error)
     throw error
@@ -43,8 +70,7 @@ export async function upsertDocuments(chunks: DocumentChunk[]) {
 }
 
 /**
- * Query the vector store for relevant content using direct REST API
- * Upstash will automatically embed the query text
+ * Query the vector store for relevant content with embeddings
  */
 export async function queryVectorStore(query: string, topK = 3) {
   console.log(`[v0] Querying vector store with: "${query}"`)
@@ -54,6 +80,8 @@ export async function queryVectorStore(query: string, topK = 3) {
   const token = process.env.UPSTASH_VECTOR_REST_TOKEN!
 
   try {
+    const queryEmbedding = await generateEmbedding(query)
+
     const response = await fetch(`${url}/query`, {
       method: "POST",
       headers: {
@@ -61,10 +89,10 @@ export async function queryVectorStore(query: string, topK = 3) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        data: query,
+        vector: queryEmbedding, // Send dense vector instead of text
         topK,
         includeMetadata: true,
-        includeData: true,
+        includeVectors: false,
       }),
     })
 
@@ -86,7 +114,7 @@ export async function queryVectorStore(query: string, topK = 3) {
     console.log(`[v0] Query successful, found ${results.length} relevant documents`)
 
     return results.map((result: any) => ({
-      text: result.data || "",
+      text: result.metadata?.text || "",
       score: result.score,
       metadata: result.metadata as DocumentChunk["metadata"],
     }))
